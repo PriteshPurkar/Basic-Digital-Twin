@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Battery Digital Twin</title>
+    <style>
+        body { font-family: Arial; text-align: center; margin-top: 50px; }
+
+        .battery {
+            width: 100px; height: 300px;   /* Bigger and vertical */
+            border: 6px solid #333;
+            position: relative; margin: auto;
+            border-radius: 12px;
+            display: flex; align-items: flex-end;  /* Fill grows upward */
+        }
+
+        .battery::after {
+            content: ''; 
+            width: 40px; height: 20px;    /* Top terminal */
+            background: #333; 
+            position: absolute; 
+            top: -24px; left: 30px;
+            border-radius: 3px;
+        }
+
+        .level {
+            width: 100%; height: 0%;      /* Start empty */
+            background: red;
+            transition: height 0.5s;
+        }
+
+        h1 { font-size: 28px; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1 id="batteryText">Battery Level: 0%</h1>
+    <div class="battery">
+        <div id="batteryFill" class="level"></div>
+    </div>
+
+    <script>
+        async function updateBattery() {
+            try {
+                const response = await fetch("/get_level");
+                const data = await response.json();
+                const level = data.level;
+
+                document.getElementById("batteryText").innerText = "Battery Level: " + level + "%";
+                const fill = document.getElementById("batteryFill");
+                fill.style.height = level + "%";  // ✅ Vertical fill
+
+                if (level < 30) {
+                    fill.style.background = "red";
+                } else if (level < 80) {
+                    fill.style.background = "orange";
+                } else {
+                    fill.style.background = "green";
+                }
+            } catch (err) {
+                console.error("Error fetching battery level:", err);
+            }
+        }
+
+        setInterval(updateBattery, 2000); // update every 2 seconds
+        updateBattery(); // initial call
+    </script>
+</body>
+</html>
